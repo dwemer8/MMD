@@ -38,37 +38,37 @@ class VA:
 
 
     def initParams(self):
-    	"""Initialize weights and biases, depending on if continuous data is modeled an extra weight matrix is created"""
-        W1 = np.random.normal(0,self.sigmaInit,(self.HU_encoder,self.dimX))
-        b1 = np.random.normal(0,self.sigmaInit,(self.HU_encoder,1))
+      """Initialize weights and biases, depending on if continuous data is modeled an extra weight matrix is created"""
+      W1 = np.random.normal(0,self.sigmaInit,(self.HU_encoder,self.dimX))
+      b1 = np.random.normal(0,self.sigmaInit,(self.HU_encoder,1))
 
-        W2 = np.random.normal(0,self.sigmaInit,(self.dimZ,self.HU_encoder))
-        b2 = np.random.normal(0,self.sigmaInit,(self.dimZ,1))
+      W2 = np.random.normal(0,self.sigmaInit,(self.dimZ,self.HU_encoder))
+      b2 = np.random.normal(0,self.sigmaInit,(self.dimZ,1))
 
-        W3 = np.random.normal(0,self.sigmaInit,(self.dimZ,self.HU_encoder))
-        b3 = np.random.normal(0,self.sigmaInit,(self.dimZ,1))
-        
-        W4 = np.random.normal(0,self.sigmaInit,(self.HU_decoder,self.dimZ))
-        b4 = np.random.normal(0,self.sigmaInit,(self.HU_decoder,1))
+      W3 = np.random.normal(0,self.sigmaInit,(self.dimZ,self.HU_encoder))
+      b3 = np.random.normal(0,self.sigmaInit,(self.dimZ,1))
+      
+      W4 = np.random.normal(0,self.sigmaInit,(self.HU_decoder,self.dimZ))
+      b4 = np.random.normal(0,self.sigmaInit,(self.HU_decoder,1))
 
-        W5 = np.random.normal(0,self.sigmaInit,(self.dimX,self.HU_decoder))
-        b5 = np.random.normal(0,self.sigmaInit,(self.dimX,1))
+      W5 = np.random.normal(0,self.sigmaInit,(self.dimX,self.HU_decoder))
+      b5 = np.random.normal(0,self.sigmaInit,(self.dimX,1))
 
-        if self.continuous:
-            W6 = np.random.normal(0,self.sigmaInit,(self.dimX,self.HU_decoder))
-            b6 = np.random.normal(0,self.sigmaInit,(self.dimX,1))
-            self.params = [W1,W2,W3,W4,W5,W6,b1,b2,b3,b4,b5,b6]
-        else:
-	       self.params = [W1,W2,W3,W4,W5,b1,b2,b3,b4,b5]
+      if self.continuous:
+          W6 = np.random.normal(0,self.sigmaInit,(self.dimX,self.HU_decoder))
+          b6 = np.random.normal(0,self.sigmaInit,(self.dimX,1))
+          self.params = [W1,W2,W3,W4,W5,W6,b1,b2,b3,b4,b5,b6]
+      else:
+        self.params = [W1,W2,W3,W4,W5,b1,b2,b3,b4,b5]
 
-        self.h = [0.01] * len(self.params)
+      self.h = [0.01] * len(self.params)
 
 
     def initH(self,miniBatch):
-    	"""Compute the gradients and use this to initialize h"""
-        totalGradients = self.getGradients(miniBatch)
-        for i in xrange(len(totalGradients)):
-            self.h[i] += totalGradients[i]*totalGradients[i]
+      """Compute the gradients and use this to initialize h"""
+      totalGradients = self.getGradients(miniBatch)
+      for i in range(len(totalGradients)):
+        self.h[i] += totalGradients[i]*totalGradients[i]
 
     def encode(self,x):
         if self.continuous:
@@ -170,49 +170,49 @@ class VA:
         if batches[-1] != N:
             batches = np.append(batches,N)
 
-        for i in xrange(0,len(batches)-2):
+        for i in range(0,len(batches)-2):
             miniBatch = data[batches[i]:batches[i+1]]
             totalGradients = self.getGradients(miniBatch.T)
             self.updateParams(totalGradients,N,miniBatch.shape[0])
 
     def getLowerBound(self,data):
-    	"""Use this method for example to compute lower bound on testset"""
-        lowerbound = 0
-        [N,dimX] = data.shape
-        batches = np.arange(0,N,self.batch_size)
-        if batches[-1] != N:
-            batches = np.append(batches,N)
+      """Use this method for example to compute lower bound on testset"""
+      lowerbound = 0
+      [N,dimX] = data.shape
+      batches = np.arange(0,N,self.batch_size)
+      if batches[-1] != N:
+        batches = np.append(batches,N)
 
-        for i in xrange(0,len(batches)-2):
-            miniBatch = data[batches[i]:batches[i+1]]
-            e = np.random.normal(0,1,[self.dimZ,miniBatch.shape[0]])
-            lowerbound += self.lowerboundfunction(*(self.params),x=miniBatch.T,eps=e)
+      for i in range(0,len(batches)-2):
 
-        return lowerbound/N
+        miniBatch = data[batches[i]:batches[i+1]]
+        e = np.random.normal(0,1,[self.dimZ,miniBatch.shape[0]])
+        lowerbound += self.lowerboundfunction(*(self.params),x=miniBatch.T,eps=e)
+
+      return lowerbound/N
 
 
     def getGradients(self,miniBatch):
-    	"""Compute the gradients for one minibatch and check if these do not contain NaNs"""
-        totalGradients = [0] * len(self.params)
-        for l in xrange(self.L):
-            e = np.random.normal(0,1,[self.dimZ,miniBatch.shape[1]])
-            gradients = self.gradientfunction(*(self.params),x=miniBatch,eps=e)
-            self.lowerbound += gradients[-1]
+      """Compute the gradients for one minibatch and check if these do not contain NaNs"""
+      totalGradients = [0] * len(self.params)
+      for l in range(self.L):
+          e = np.random.normal(0,1,[self.dimZ,miniBatch.shape[1]])
+          gradients = self.gradientfunction(*(self.params),x=miniBatch,eps=e)
+          self.lowerbound += gradients[-1]
 
-            for i in xrange(len(self.params)):
-                totalGradients[i] += gradients[i]
+          for i in range(len(self.params)):
+              totalGradients[i] += gradients[i]
 
-        return totalGradients
+      return totalGradients
 
     def updateParams(self,totalGradients,N,current_batch_size):
-    	"""Update the parameters, taking into account AdaGrad and a prior"""
-        for i in xrange(len(self.params)):
-            self.h[i] += totalGradients[i]*totalGradients[i]
-            if i < 5 or (i < 6 and len(self.params) == 12):
-                prior = 0.5*self.params[i]
-            else:
-                prior = 0
+      """Update the parameters, taking into account AdaGrad and a prior"""
+      for i in range(len(self.params)):
+          self.h[i] += totalGradients[i]*totalGradients[i]
+          if i < 5 or (i < 6 and len(self.params) == 12):
+              prior = 0.5*self.params[i]
+          else:
+              prior = 0
 
-            self.params[i] += self.learning_rate/np.sqrt(self.h[i]) * (totalGradients[i] - prior*(current_batch_size/N))
+          self.params[i] += self.learning_rate/np.sqrt(self.h[i]) * (totalGradients[i] - prior*(current_batch_size/N))
     
-     
