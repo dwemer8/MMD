@@ -11,16 +11,17 @@ import VariationalAutoencoder
 import numpy as np
 import scipy as sp
 import time,os
-import gzip, cPickle,copy,pickle
+import _pickle as cPickle
+import gzip,copy,pickle
 from sklearn import linear_model
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from mmd import MMD_3_Sample_Test
 
-print "Loading MNIST data"
+print("Loading MNIST data")
 #Retrieved from: http://deeplearning.net/data/mnist/mnist.pkl.gz
 
 f = gzip.open('mnist.pkl.gz', 'rb')
-(x_train, t_train), (x_valid, t_valid), (x_test, t_test)  = cPickle.load(f)
+(x_train, t_train), (x_valid, t_valid), (x_test, t_test)  = cPickle.load(f, encoding='latin1')
 f.close()
 x_train=(x_train>0).astype('float')
 x_valid=(x_valid>0).astype('float')
@@ -65,17 +66,17 @@ encoder1 = VariationalAutoencoder.VA(HU_decoder,HU_encoder,dimX,dimZ,batch_size,
 encoder2 = VariationalAutoencoder.VA(HU_decoder2,HU_encoder2,dimX,dimZ2,batch_size,L,learning_rate,continous=False)
 
 
-print "Creating Theano functions"
+print("Creating Theano functions")
 encoder1.createGradientFunctions()
 encoder2.createGradientFunctions()
-print "Initializing weights and biases"
+print("Initializing weights and biases")
 encoder1.initParams()
 encoder2.initParams()  
 
 begin = time.time()
 maxiter=2000
 testlowerbound1=testlowerbound2=-np.Inf
-for j in xrange(maxiter):
+for j in range(maxiter):
     encoder1.iterate(data1)  
     if j%1 == 0:
         oldlower=testlowerbound1
@@ -91,7 +92,7 @@ for j in xrange(maxiter):
 
 encoder1=best_encoder1
 
-for j in xrange(maxiter):
+for j in range(maxiter):
     encoder2.iterate(data2) 
 
     if j%1 == 0:
@@ -130,5 +131,3 @@ LogReg_VAE = linear_model.LogisticRegression()
 LogReg_VAE.fit(data2_enc,t_valid)
 vae2_score = LogReg_VAE.score(test2_enc, t_test)
 print("Accuracy 1:%.2f Accuracy2:%.2f"%(vae1_score,vae2_score))
-
-
